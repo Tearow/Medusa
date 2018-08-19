@@ -17,6 +17,7 @@ import Snotify from 'vue-snotify';
 import Truncate from 'vue-truncate-collapsed';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
+import { displayNotification } from './notifications';
 import store from './store';
 import router from './router';
 import { isDevelopment } from './utils';
@@ -66,6 +67,7 @@ if (window) {
     window.Truncate = Truncate;
     window.axios = axios;
     window._ = { debounce };
+    window.displayNotification = displayNotification;
     window.store = store;
     window.router = router;
     window.apiRoute = apiRoute;

@@ -107,7 +107,6 @@
 
         <script type="text/javascript" src="js/browser.js?${sbPID}"></script>
 
-        <script type="text/javascript" src="js/notifications.js?${sbPID}"></script>
         <script>
             // Used to get username to the app.js and header
             % if app.WEB_USERNAME and app.WEB_PASSWORD and '/login' not in full_url:
