@@ -3,6 +3,8 @@ import 'pnotify/lib/es/PNotifyDesktop'; // eslint-disable-line import/no-unassig
 import 'pnotify/lib/es/PNotifyButtons'; // eslint-disable-line import/no-unassigned-import
 import 'pnotify/lib/es/PNotifyHistory'; // eslint-disable-line import/no-unassigned-import
 import 'pnotify/dist/PNotifyBrightTheme.css'; // eslint-disable-line import/no-unassigned-import
+// eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved, import/extensions
+import MedusaIcon from 'url-loader!../static/images/ico/favicon-196.png';
 
 // Configure defaults
 PNotify.defaults = {
@@ -24,7 +26,7 @@ PNotify.modules.Desktop.defaults = {
     ...PNotify.modules.Desktop.defaults,
     desktop: true,
     fallback: true,
-    icon: 'images/ico/favicon-120.png'
+    icon: MedusaIcon
 };
 PNotify.modules.Buttons.defaults.closer = true;
 PNotify.modules.Buttons.defaults.closerHover = false;

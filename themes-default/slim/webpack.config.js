@@ -92,7 +92,7 @@ const webpackConfig = (env, mode) => ({
             cacheGroups: {
                 runtime: {
                     name: 'medusa-runtime',
-                    test: /[\\/]src[\\/]/,
+                    test: /[\\/](src|static)[\\/]/,
                     minChunks: 2,
                     priority: 0,
                     reuseExistingChunk: true
