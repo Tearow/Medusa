@@ -60,8 +60,26 @@ const displayNotification = (type, title, message, id) => {
     });
 };
 
-PNotify.modules.Desktop.permission();
+/**
+ * Request notifications permission.
+ */
+const requestPermission = () => {
+    PNotify.modules.Desktop.permission();
+};
+
+/**
+ * Check notifications permission.
+ * @returns {boolean} - `true` if user granted permission, `false` if not, or if the browser API isn't available.
+ */
+const checkPermission = () => {
+    return !PNotify.modules.Desktop.checkPermission();
+};
+
+// @FIXME: Requesting permission without a user action is a violation.
+requestPermission();
 
 export {
-    displayNotification
+    checkPermission,
+    displayNotification,
+    requestPermission
 };
