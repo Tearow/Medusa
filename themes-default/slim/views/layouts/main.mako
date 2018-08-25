@@ -54,6 +54,8 @@
     <body ${('', attributes)[bool(loggedIn)]} web-root="${app.WEB_ROOT}">
         <div id="vue-wrap" class="container-fluid">
 
+          <vue-snotify></vue-snotify>
+
           <div v-if="globalLoading" class="text-center">
               <h3>Loading&hellip;</h3>
               If this is taking too long,<br>
