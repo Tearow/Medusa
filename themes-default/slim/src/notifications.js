@@ -1,46 +1,64 @@
-import PNotify from 'pnotify/lib/es/PNotify';
-import 'pnotify/lib/es/PNotifyDesktop'; // eslint-disable-line import/no-unassigned-import
-import 'pnotify/lib/es/PNotifyButtons'; // eslint-disable-line import/no-unassigned-import
-import 'pnotify/lib/es/PNotifyHistory'; // eslint-disable-line import/no-unassigned-import
-import 'pnotify/dist/PNotifyBrightTheme.css'; // eslint-disable-line import/no-unassigned-import
-// eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved, import/extensions
-import MedusaIcon from 'url-loader!../static/images/ico/favicon-196.png';
+import icon from '../static/images/ico/favicon-196.png';
 
-// Configure defaults
-PNotify.defaults = {
-    ...PNotify.defaults,
-    addClass: 'stack-bottomright',
-    delay: 5000,
-    hide: true,
-    shadow: false,
-    styling: 'bootstrap3',
-    width: '340px',
-    stack: {
-        dir1: 'up',
-        dir2: 'left',
-        firstpos1: 25,
-        firstpos2: 25
+/**
+ * Request notifications permission.
+ *
+ * @returns {Promise} User's response to the permission request
+ */
+const requestPermission = () => {
+    if ('Notification' in window && 'requestPermission' in Notification) {
+        return Notification.requestPermission();
     }
+    return Promise.reject(new Error('API is unavailable'));
 };
-PNotify.modules.Desktop.defaults = {
-    ...PNotify.modules.Desktop.defaults,
-    desktop: true,
-    fallback: true,
-    icon: MedusaIcon
+
+/**
+ * Check notifications permission.
+ *
+ * Possible return values:
+ * - `'default'`: The user hasn't been asked for permission yet, so notifications won't be displayed.
+ * - `'granted'`: The user has granted permission to display notifications, after having been asked previously.
+ * - `'denied'`: The user has explicitly declined permission to show notifications.
+ * - `undefined`: The browser API isn't available.
+ *
+ * @returns {string|undefined} See above
+ */
+const checkPermission = () => {
+    if ('Notification' in window && 'permission' in Notification) {
+        return Notification.permission;
+    }
+    return undefined;
 };
-PNotify.modules.Buttons.defaults.closer = true;
-PNotify.modules.Buttons.defaults.closerHover = false;
-PNotify.modules.History.defaults.maxInStack = 5;
 
 /**
  * Display a notification to the user.
+ *
  * @param {string} type - Notification type (`notice`, `info`, `success`, or `error`).
  * @param {string} title - Notification title.
  * @param {string} message - Notification body.
- * @param {(string|number)} id - Unique notification ID to prevent duplicate desktop notifications.
+ * @param {(string|number)} tag - Unique notification ID to prevent duplicate desktop notifications.
+ * @returns {Notification|boolean} - The notification object or false if the notification wasn't displayed.
  */
-const displayNotification = (type, title, message, id) => {
-    const text = String(message)
+const displayNotification = (type, title, message, tag) => {
+    if (!('Notification' in window)) {
+        // This browser does not support system notifications
+        // @TODO: Alert the user in a different way?
+        return false;
+    }
+
+    if (checkPermission() === 'denied') {
+        // The user has denied notifications.
+        // @TODO: Alert the user in a different way?
+        return false;
+    }
+
+    if (checkPermission() === 'default') {
+        // The user has yet to grant permission.
+        // @TODO: Request permission, wait for the response and continue accordingly?
+        return false;
+    }
+
+    const body = String(message)
         .replace(/<br[\s/]*(?:\s[^>]*)?>/ig, '\n') // eslint-disable-line unicorn/no-unsafe-regex
         .replace(/<[/]?b(?:\s[^>]*)?>/ig, '*') // eslint-disable-line unicorn/no-unsafe-regex
         .replace(/<i(?:\s[^>]*)?>/ig, '[') // eslint-disable-line unicorn/no-unsafe-regex
@@ -48,31 +66,33 @@ const displayNotification = (type, title, message, id) => {
         .replace(/<(?:[/]?ul|\/li)(?:\s[^>]*)?>/ig, '') // eslint-disable-line unicorn/no-unsafe-regex
         .replace(/<li(?:\s[^>]*)?>/ig, '\n* '); // eslint-disable-line unicorn/no-unsafe-regex
 
-    PNotify.alert({
-        type,
-        title,
-        text,
-        modules: {
-            Desktop: {
-                tag: id
-            }
-        }
+    const notice = new Notification(title, {
+        body,
+        tag,
+        icon,
+        // @TODO: This can be used to display an image within the notification
+        image: undefined
     });
-};
 
-/**
- * Request notifications permission.
- */
-const requestPermission = () => {
-    PNotify.modules.Desktop.permission();
-};
+    // Notification clicked
+    const onClick = () => {
+        // @TODO: Display the full notification in a dialog?
+    };
+    // Notification closed
+    const onClose = () => {};
 
-/**
- * Check notifications permission.
- * @returns {boolean} - `true` if user granted permission, `false` if not, or if the browser API isn't available.
- */
-const checkPermission = () => {
-    return !PNotify.modules.Desktop.checkPermission();
+    if ('NotificationEvent' in window) {
+        notice.addEventListener('notificationclick', onClick);
+        notice.addEventListener('close', onClose);
+    } else if ('addEventListener' in notice) {
+        notice.addEventListener('click', onClick);
+        notice.addEventListener('close', onClose);
+    } else {
+        notice.onclick = onClick; // eslint-disable-line unicorn/prefer-add-event-listener
+        notice.onclose = onClose;
+    }
+
+    return notice;
 };
 
 // @FIXME: Requesting permission without a user action is a violation.

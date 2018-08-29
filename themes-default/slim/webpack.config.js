@@ -165,6 +165,10 @@ const webpackConfig = (env, mode) => ({
                         outputPath: 'fonts'
                     }
                 }]
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/,
+                loader: 'url-loader'
             }
         ]
     },
