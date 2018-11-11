@@ -1,4 +1,4 @@
-import Push, { PushNotification } from 'push.js';
+import Push from 'push.js';
 import icon from '../static/images/ico/favicon-196.png';
 
 Push.config({
@@ -41,7 +41,7 @@ export const hasPermission = Push.Permission.has;
  * @param {string} title - Notification title.
  * @param {string} message - Notification body.
  * @param {(string|number)} tag - Unique notification ID to prevent duplicate desktop notifications.
- * @returns {Promise<PushNotification>} A notification object
+ * @returns {Promise} A notification object
  */
 export const displayNotification = (type, title, message, tag) => {
     const body = String(message)
